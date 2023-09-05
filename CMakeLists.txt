@@ -6,4 +6,21 @@ add_executable(containers
         main.cpp vector2.hpp list2.hpp
         cint.hpp)
 
-set_target_properties(containers PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)        
+set_target_properties(containers PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)       
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+    CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(containers PRIVATE 
+        -g
+        -Wall
+        -Wextra
+        -Werror
+        -pedantic
+    )
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(containers PRIVATE
+        /EHsc
+        /W4
+        /WX
+    )
+endif()

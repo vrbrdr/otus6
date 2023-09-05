@@ -18,6 +18,19 @@ template <typename TContainer> void print(TContainer& v) {
     std::cout << "size: " << v.size() << std::endl;
 }
 
+template <typename TContainer> void print_reverse(TContainer& v) {
+    std::cout << "reverse content: ";
+
+    auto idx = v.end();
+
+    do {
+        --idx;
+        std::cout << *idx << ", ";
+    } while (idx != v.begin());
+
+    std::cout << "size: " << v.size() << std::endl;
+}
+
 template <typename TContainer, typename TItem>
 void container_test(string TContainerName) {
     cout << "test: " << TContainerName << endl;
@@ -47,6 +60,8 @@ void container_test(string TContainerName) {
     auto v3 = std::move(v2);
 
     print(v3);
+
+    print_reverse(v3);
 }
 
 template <typename TItem> void containers_test(string TItemName) {
@@ -66,7 +81,7 @@ void additional_test() {
     assert(cint::instances == 0);
 }
 
-int main(int argc, char** argv) {
+int main() {
     homework_test();
     // additional_test();
 

@@ -42,7 +42,7 @@ namespace containers {
             }
 
             _iterator& operator--() {
-                if (end) {
+                if (m_end) {
                     m_end = false;
                 } else if (m_index->m_prev) {
                     m_index = m_index->m_prev;
