@@ -25,17 +25,29 @@ namespace containers {
 
         class _iterator {
           public:
+            typedef std::forward_iterator_tag iterator_category;
+            typedef std::ptrdiff_t difference_type;
+            typedef T value_type;
+            typedef value_type* pointer;
+            typedef value_type& reference;
+
             _iterator(_item* index, bool end) : m_index{index}, m_end{end} {}
 
             T& operator*() const {
+                if (m_end) {
+                    throw std::out_of_range("iterator at the end");
+                }
+
                 return m_index->m_value;
             }
 
             _iterator& operator++() {
                 if (m_index->m_next) {
                     m_index = m_index->m_next;
-                } else {
+                } else if (!m_end) {
                     m_end = true;
+                } else {
+                    throw std::out_of_range("iterator already at the end");
                 }
 
                 return *this;
@@ -46,6 +58,8 @@ namespace containers {
                     m_end = false;
                 } else if (m_index->m_prev) {
                     m_index = m_index->m_prev;
+                } else {
+                    throw std::out_of_range("iterator already at the begin");
                 }
 
                 return *this;
@@ -65,13 +79,15 @@ namespace containers {
         };
 
       public:
+        typedef T value_type;
+
         list2() = default;
 
         list2(const ltype& src) {
             copy(src);
         }
 
-        list2(ltype&& src)
+        list2(ltype&& src) noexcept
             : m_size{src.m_size}, m_head{src.m_head}, m_tail{src.m_tail} {
 
             src.m_size = 0;
@@ -151,7 +167,7 @@ namespace containers {
             m_size = 0;
         }
 
-        T& operator[](const size_t i) const {
+        T& operator[](const size_t i) {
             return index_of(i)->m_value;
         }
 
@@ -160,7 +176,7 @@ namespace containers {
         }
 
         _iterator begin() const noexcept {
-            return _iterator(m_head, false);
+            return _iterator(m_head, m_size == 0);
         }
 
         _iterator end() const noexcept {
@@ -174,8 +190,8 @@ namespace containers {
 
       private:
         _item* index_of(size_t position) {
-            if (position > m_size) {
-                throw new std::out_of_range("position > m_size");
+            if (position >= m_size) {
+                throw std::out_of_range("position >= m_size");
             }
 
             auto item = m_head;
@@ -215,5 +231,11 @@ namespace containers {
             }
         }
     };
+
+    template <typename T>
+    inline bool operator==(const list2<T>& x, const list2<T>& y) {
+        return (x.size() == y.size() &&
+                std::equal(x.begin(), x.end(), y.begin()));
+    }
 
 } // namespace containers

@@ -6,11 +6,16 @@
 
 namespace containers {
     template <typename T> class vector2 {
-
         typedef vector2<T> vtype;
 
         class _iterator {
           public:
+            typedef std::forward_iterator_tag iterator_category;
+            typedef std::ptrdiff_t difference_type;
+            typedef T value_type;
+            typedef value_type* pointer;
+            typedef value_type& reference;
+
             _iterator(const vtype* parent, size_t index)
                 : m_parent{parent}, m_index{index} {}
 
@@ -19,11 +24,19 @@ namespace containers {
             }
 
             _iterator& operator++() {
+                if (m_index >= m_parent->m_size) {
+                    throw std::out_of_range("iterator already at the end");
+                }
+
                 ++m_index;
                 return *this;
             }
 
             _iterator& operator--() {
+                if (!m_index) {
+                    throw std::out_of_range("iterator already at the begin");
+                }
+
                 --m_index;
                 return *this;
             }
@@ -42,13 +55,19 @@ namespace containers {
         };
 
       public:
+        typedef T value_type;
+
         vector2() = default;
+
+        vector2(size_t size) {
+            resize(size);
+        }
 
         vector2(const vtype& src) {
             copy(src);
         }
 
-        vector2(vtype&& src)
+        vector2(vtype&& src) noexcept
             : m_size{src.m_size}, m_storage_size{src.m_storage_size},
               m_storage{src.m_storage} {
 
@@ -97,8 +116,8 @@ namespace containers {
         }
 
         void erase(size_t position) {
-            if (position > m_size) {
-                throw new std::out_of_range("position > m_size");
+            if (position >= m_size) {
+                throw std::out_of_range("position >= m_size");
             }
 
             m_storage[position].~T();
@@ -112,7 +131,7 @@ namespace containers {
 
         T& operator[](const size_t i) const {
             if (i >= m_size) {
-                throw new std::out_of_range("i >= size");
+                throw std::out_of_range("i >= size");
             }
 
             return m_storage[i];
@@ -171,7 +190,7 @@ namespace containers {
 
         void move_tail_left(size_t position, size_t shift_size) {
             for (size_t i = position; i < m_size; ++i) {
-                m_storage[i - shift_size] = m_storage[i];
+                m_storage[i - shift_size] = std::move(m_storage[i]);
             }
         }
 
@@ -180,7 +199,7 @@ namespace containers {
 
             do {
                 --i;
-                m_storage[i + shift_size] = m_storage[i];
+                m_storage[i + shift_size] = std::move(m_storage[i]);
             } while (i > position);
         }
 
@@ -190,13 +209,13 @@ namespace containers {
             }
 
             new (m_storage + m_size) T(std::move(value));
-            m_size++;
+            ++m_size;
         }
 
         template <typename TArg>
         void insert_impl(size_t position, TArg& value) {
             if (position > m_size) {
-                throw new std::out_of_range("position > m_size");
+                throw std::out_of_range("position > m_size");
             }
 
             if (m_size >= m_storage_size) {
@@ -218,5 +237,11 @@ namespace containers {
             m_size = src.m_size;
         }
     };
+
+    template <typename T>
+    inline bool operator==(const vector2<T>& x, const vector2<T>& y) {
+        return (x.size() == y.size() &&
+                std::equal(x.begin(), x.end(), y.begin()));
+    }
 
 } // namespace containers

@@ -1,26 +1,25 @@
-cmake_minimum_required(VERSION 3.7.2)
+cmake_minimum_required(VERSION 3.14)
 
 project(containers)
 
-add_executable(containers
-        main.cpp vector2.hpp list2.hpp
-        cint.hpp)
-
-set_target_properties(containers PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)       
+#set_target_properties(containers PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)       
+set(CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD_REQUIRED TRUE)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
     CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(containers PRIVATE 
-        -g
-        -Wall
-        -Wextra
-        -Werror
-        -pedantic
-    )
+    add_compile_options(-g -Wall -Wextra -Werror -pedantic)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(containers PRIVATE
-        /EHsc
-        /W4
-        /WX
-    )
+    add_compile_options(/EHsc /W4 /WX)
 endif()
+
+set(COMMON_SRCS
+    vector2.hpp 
+    list2.hpp
+)
+
+add_subdirectory(tests)
+
+add_executable(containers main.cpp ${COMMON_SRCS})
+
+

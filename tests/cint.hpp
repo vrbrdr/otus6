@@ -12,34 +12,38 @@ class cint {
     cint() = delete;
     cint(int i) : m_i{i} {
         ++instances;
-        std::cout << "add " << i << std::endl;
+        // std::cout << "add " << i << std::endl;
     }
 
     cint(const cint& src) : m_i{src.m_i} {
         ++instances;
-        std::cout << "copy " << m_i << std::endl;
+        ++copy_count;
+        //std::cout << "copy " << m_i << std::endl;
     }
 
     cint(cint&& src) : m_i{src.m_i} {
         ++instances;
-        std::cout << "move " << m_i << std::endl;
+        ++move_count;
+        //std::cout << "move " << m_i << std::endl;
     }
 
     cint& operator=(const cint& src) {
         m_i = src.m_i;
-        std::cout << "copy= " << m_i << std::endl;
+        ++copy_count;
+        //std::cout << "copy= " << m_i << std::endl;
         return *this;
     }
 
     cint& operator=(cint&& src) {
         m_i = src.m_i;
-        std::cout << "move= " << m_i << std::endl;
+        ++move_count;
+        //std::cout << "move= " << m_i << std::endl;
         return *this;
     }
 
     ~cint() {
         --instances;
-        std::cout << "~" << m_i << std::endl;
+        // std::cout << "~" << m_i << std::endl;
     }
 
     int get_i() const noexcept {
@@ -51,9 +55,16 @@ class cint {
     }
 
     static int instances;
+    static int copy_count;
+    static int move_count;
+    friend bool operator==(const cint& lh, const cint& rh);
 };
 
 inline std::ostream& operator<<(std::ostream& out, const cint& point) {
     out << "cint_" << point.get_i();
     return out;
+}
+
+inline bool operator==(const cint& a, const cint& b) {
+    return a.m_i == b.m_i;
 }
